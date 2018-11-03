@@ -2,6 +2,7 @@
 Checks to make sure TwoToneDetect is working
 
 
-sudo add-apt-repository ppa:jonathonf/python-3.6
+pip install boto3
+create credentials ~/.aws/credentials
 
 
