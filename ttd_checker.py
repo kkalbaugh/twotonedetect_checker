@@ -3,10 +3,8 @@ import smtplib
 from datetime import timedelta, datetime, timezone
 import time
 import os.path
-import ttd_aws
 import logging
 from logging.handlers import RotatingFileHandler
-
 import config
 
 # Check what email system to use

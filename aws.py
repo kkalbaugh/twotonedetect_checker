@@ -3,7 +3,7 @@ from botocore.exceptions import ClientError
 import logging
 import config
 
-logger = logging.getLogger('zmchecker.smtp')
+logger = logging.getLogger('ttdchecker.smtp')
 
 # Replace sender@example.com with your "From" address.
 # This address must be verified with Amazon SES.
