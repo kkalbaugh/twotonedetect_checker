@@ -44,7 +44,7 @@ def utc_to_local(utc_dt):
 def sendagain():
     if not os.path.isfile(config.lastsentfile):
         print("Need to create file")
-        logger.info("%s doesn't exist.  Need to create file" % lastsendfile)
+        logger.info("%s doesn't exist.  Need to create file" % config.lastsendfile)
         return 1
     else:
         try:
