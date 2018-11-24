@@ -7,25 +7,30 @@ import ttd_aws
 import logging
 from logging.handlers import RotatingFileHandler
 
+import config
+
+# Check what email system to use
+if config.email_type == "aws":
+    import aws as email
+if config.email_type == "smtp":
+    import smtp as email
+
+try:
+    logLevel = config.logLevel
+except:
+    logLevel = 'DEBUG'
+
+# Create Logging Object
+logger = logging.getLogger('ttdchecker')
+log_level = logging.getLevelName(logLevel)
+logger.setLevel(log_level)
+
+# Setup Logging Handlers & Level
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
-
-logFile = 'ftp/files/ttd.log'
-
-ttd_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024, 
-                                 backupCount=2, encoding=None, delay=0)
+ttd_handler = RotatingFileHandler(config.logFile, mode='a', maxBytes=5*1024*1024,backupCount=2, encoding=None, delay=0)
 ttd_handler.setFormatter(log_formatter)
-ttd_handler.setLevel(logging.INFO)
 
-app_log = logging.getLogger('root')
-app_log.setLevel(logging.INFO)
-
-app_log.addHandler(ttd_handler)
-
-statusfile = 'ftp/files/CommonStatusFile.txt' 
-lastsentfile = 'ftp/files/lastsent.txt'
-
-subject = ''
-text = ''
+logger.addHandler(ttd_handler)
 
 
 now = datetime.now().timestamp()
@@ -39,13 +44,13 @@ def utc_to_local(utc_dt):
     return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
 
 def sendagain():
-    if not os.path.isfile(lastsentfile):
+    if not os.path.isfile(config.lastsentfile):
         print("Need to create file")
-        app_log.info("%s doesn't exist.  Need to create file" % lastsendfile)
+        logger.info("%s doesn't exist.  Need to create file" % lastsendfile)
         return 1
     else:
         try:
-            with open(lastsentfile) as fp:  
+            with open(config.lastsentfile) as fp:  
                 line = fp.readline()
                 lastemail = int(line)
                 fp.close()
@@ -61,20 +66,20 @@ def sendagain():
                     print("Ready to send again")
                     return 1
         except:
-            app_log.error("Unable to open %s" % lastsentfile)
+            logger.error("Unable to open %s" % config.lastsentfile)
             
 def openStatusFile():
-     with open(statusfile) as tsv:
+     with open(config.statusfile) as tsv:
         for line in csv.reader(tsv, dialect="excel-tab"): #You can also use delimiter="\t" rather than giving a dialect.
             times.append(float(line[1]));
     
 if __name__ == "__main__":
-    app_log.info("Started Program")
-    subject = "BDFD TwoToneDetect "
+    logger.info("Started Program")
+   
     try:
         openStatusFile()
     except:
-        app_log.error("Couldn't Open Status File")
+        logger.error("Couldn't Open Status File")
     print("Times listed in file: %s" % times)
     lastrecv = max(times)
     #print(type(lastrecv))
@@ -86,11 +91,10 @@ if __name__ == "__main__":
         print("Status is OK")
         ready = sendagain();
         if ready > 2:
-            text = "TwoToneDetect is Working Again!"
-            subject = "TwoToneDectect Back Online"
+            text = "TwoToneDetect is Working Again!"            
             print(text)
-            aws.sendawsemail(text,subject)
-            ts = open(lastsentfile, 'w')
+            aws.sendawsemail(text,config.email_subject)
+            ts = open(config.lastsentfile, 'w')
             ts.write("0")
             ts.close()       
         else:
@@ -102,11 +106,10 @@ if __name__ == "__main__":
         print(ready)
         if ready == 1:
             text = "TTD last received update at "
-            text += lastrecv_str
-            subject = "TTD Not Working!"
+            text += lastrecv_str            
             print(text)
-            aws.sendawsemail(text,subject)
-            ts = open(lastsentfile, 'w')
+            aws.sendawsemail(text,config.email_subject+" Error")
+            ts = open(config.lastsentfile, 'w')
             ts.write(str(int(now)))
             ts.close()       
         else:

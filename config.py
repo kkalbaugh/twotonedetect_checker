@@ -5,6 +5,7 @@ statusfile = '/home/XXX/ftp/files/CommonStatusFile.txt'
 email_resend = 24 # Number of hours before resending email about problem
 email_from=""  # "ZoneMinder <email@domain.com>"
 email_to=""   # someone@email.com
+email_subject="TwoToneDectect" # Fire Department TTD
 
 # Email Type SMTP or Use AWS
 email_type="smtp"  # stmp or aws
