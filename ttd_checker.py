@@ -65,6 +65,7 @@ def sendagain():
                     return 1
         except:
             logger.error("Unable to open %s" % config.lastsentfile)
+            return 1
             
 def openStatusFile():
      with open(config.statusfile) as tsv:
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     if any(x > hourago for x in times):        
         print("Status is OK")
         ready = sendagain();
-        if ready > 2:
+        if int(ready) > 2:
             text = "TwoToneDetect is Working Again!"            
             print(text)
             aws.sendawsemail(text,config.email_subject)
